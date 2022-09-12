@@ -29,26 +29,33 @@ object Awesome extends App {
 
   // fixme
 //  println(hybrid.shout)
-//  println(AwesomeShoutDerivation.gen[GenericHybrid].epicDescription(hybrid))
+
+  AwesomeShoutDerivation.gen[Dwarf]
+
+  println(AwesomeShoutDerivation.genR[GenericHybrid].asInstanceOf[ShoutCC[GenericHybrid]].epicDescription(hybrid))
 
 }
 
 object AwesomeShoutDerivation {
   import Awesome._
+
   implicit def gen[T]: ShoutCC[T] = macro Magnolia.gen[T]
+
+  implicit def genR[T]: Shout[T] = macro Magnolia.gen[T]
 
   type Typeclass[T] = Shout[T]
 
-  def split[T](ctx: SealedTrait[ShoutCC, T]): Shout[T] =
+  def split[T](ctx: SealedTrait[Shout, T]): ShoutCC[T] =
     new ShoutCC[T] {
       override def shout(a: T): String =
         ctx.split(a) { sub =>
-          sub.typeclass.shout(sub.cast(a))
+          sub.typeclass.asInstanceOf[ShoutCC[sub.SType]].shout(sub.cast(a))
         }
 
       override def epicDescription(a: T): String =
         ctx.split(a) { sub =>
-          sub.typeclass.epicDescription(sub.cast(a))
+          sub.typeclass.asInstanceOf[ShoutCC[sub.SType]].epicDescription(sub.cast(a))
+
         }
 
 //      override def epicDescription(a: T): String =
