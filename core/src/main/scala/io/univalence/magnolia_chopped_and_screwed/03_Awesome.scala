@@ -32,16 +32,60 @@ object Awesome extends App {
 
   AwesomeShoutDerivation.gen[Dwarf]
 
-  println(AwesomeShoutDerivation.genR[GenericHybrid].asInstanceOf[ShoutCC[GenericHybrid]].epicDescription(hybrid))
+  implicit val shoutRace: Shout[Race] = AwesomeShoutDerivation.bugGenR[Race]
+
+  // implicit val shoutRace: Shout[Race] = null
+
+  // import AwesomeShoutDerivation._
+  // implicitly[ShoutCC[Race]]
+
+  println(AwesomeShoutDerivation.gen[GenericHybrid].epicDescription(hybrid))
 
 }
+
+//sealed trait Marker[+T]
+//
+//object Marker {
+//  sealed trait Value[T] extends Marker[T]
+//
+//  object Value {
+//    private def marker[T]: Value[T] = new Value[T] {}
+//    implicit def str: Value[String] = marker
+//    implicit def int: Value[Int]    = marker
+//  }
+//
+//  sealed trait Join[T] extends Marker[T]
+//
+//  object Join {
+//    type Typeclass[T] = Marker[T]
+//    implicit def gen[T]: Join[T] = macro Magnolia.gen[T]
+//    def join[T](ctx: CaseClass[Typeclass, T]): Join[T] = new Join[T] {}
+//  }
+//
+//  case object NoMarker extends Marker[Nothing]
+//
+//  implicit def noMarker[T]: Marker[T] = NoMarker
+//
+//  sealed trait Split[T] extends Marker[T]
+//  object Split {
+//    type Typeclass[T] = Marker[T]
+//    implicit def gen[T]: Split[T] = macro Magnolia.gen[T]
+//    def split[T](ctx: SealedTrait[Typeclass, T]): Split[T] = new Split[T] {}
+//  }
+//}
+//
+//object MarkerTest {
+//  implicitly[Marker.Join[GenericHybrid]]
+//
+//  implicitly[Marker.Value[String]]
+//}
 
 object AwesomeShoutDerivation {
   import Awesome._
 
   implicit def gen[T]: ShoutCC[T] = macro Magnolia.gen[T]
 
-  implicit def genR[T]: Shout[T] = macro Magnolia.gen[T]
+  def bugGenR[T]: Shout[T] = macro Magnolia.gen[T]
 
   type Typeclass[T] = Shout[T]
 
@@ -55,7 +99,6 @@ object AwesomeShoutDerivation {
       override def epicDescription(a: T): String =
         ctx.split(a) { sub =>
           sub.typeclass.asInstanceOf[ShoutCC[sub.SType]].epicDescription(sub.cast(a))
-
         }
 
 //      override def epicDescription(a: T): String =
