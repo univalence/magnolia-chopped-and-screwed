@@ -21,65 +21,14 @@ object Awesome extends App {
     def epicDescription: String = shoutCC.epicDescription(a)
   }
 
-  val human        = Human(firstName = "John", lastName = "Doe", sound = "Hello world", socialSecurityNumber = 123)
-  val dwarf        = Dwarf(name = "gimli", sound = "uh", goldAmount = 1000)
-  val blob         = Blob
-  val littlePerson = LittlePerson(human, dwarf)
-  val hybrid       = GenericHybrid(human, dwarf)
-
-  // fixme
-//  println(hybrid.shout)
-
-  AwesomeShoutDerivation.gen[Dwarf]
+  val human  = Human(firstName = "John", lastName = "Doe", sound = "Hello world", socialSecurityNumber = 123)
+  val dwarf  = Dwarf(name = "gimli", sound = "uh", goldAmount = 1000)
+  val hybrid = GenericHybrid(human, dwarf)
 
   implicit val shoutRace: Shout[Race] = AwesomeShoutDerivation.bugGenR[Race]
-
-  // implicit val shoutRace: Shout[Race] = null
-
-  // import AwesomeShoutDerivation._
-  // implicitly[ShoutCC[Race]]
-
   println(AwesomeShoutDerivation.gen[GenericHybrid].epicDescription(hybrid))
 
 }
-
-//sealed trait Marker[+T]
-//
-//object Marker {
-//  sealed trait Value[T] extends Marker[T]
-//
-//  object Value {
-//    private def marker[T]: Value[T] = new Value[T] {}
-//    implicit def str: Value[String] = marker
-//    implicit def int: Value[Int]    = marker
-//  }
-//
-//  sealed trait Join[T] extends Marker[T]
-//
-//  object Join {
-//    type Typeclass[T] = Marker[T]
-//    implicit def gen[T]: Join[T] = macro Magnolia.gen[T]
-//    def join[T](ctx: CaseClass[Typeclass, T]): Join[T] = new Join[T] {}
-//  }
-//
-//  case object NoMarker extends Marker[Nothing]
-//
-//  implicit def noMarker[T]: Marker[T] = NoMarker
-//
-//  sealed trait Split[T] extends Marker[T]
-//  object Split {
-//    type Typeclass[T] = Marker[T]
-//    implicit def gen[T]: Split[T] = macro Magnolia.gen[T]
-//    def split[T](ctx: SealedTrait[Typeclass, T]): Split[T] = new Split[T] {}
-//  }
-//}
-//
-//object MarkerTest {
-//  implicitly[Marker.Join[GenericHybrid]]
-//
-//  implicitly[Marker.Value[String]]
-//}
-
 object AwesomeShoutDerivation {
   import Awesome._
 
@@ -100,19 +49,6 @@ object AwesomeShoutDerivation {
         ctx.split(a) { sub =>
           sub.typeclass.asInstanceOf[ShoutCC[sub.SType]].epicDescription(sub.cast(a))
         }
-
-//      override def epicDescription(a: T): String =
-//        ctx.split(a) { sub =>
-//          sub.typeclass match {
-//            case _: Orc =>
-//              epicDescription(sub.cast(a)).zipWithIndex
-//                .map(tuple => if (tuple._2 % 2 != 0) tuple._1 else tuple._1.toUpper)
-//                .mkString
-//            case _ => epicDescription(sub.cast(a))
-//
-//          }
-//        }
-
     }
 
   def join[T](ctx: CaseClass[Shout, T]): ShoutCC[T] =
